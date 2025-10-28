@@ -34,18 +34,14 @@ def main():
         if cmd == 'load' and len(parts) == 2:
             path = parts[1]
             pairs = load_csv(path)
-            # Replace current content
-            trie = Trie()
+            trie = Trie()  # Reset trie
             for w, s in pairs:
                 trie.insert(w, s)
             continue
 
         if cmd == 'save' and len(parts) == 2:
             path = parts[1]
-            # NOTE: you may want a method to iterate words with scores
-            # For now, expect students to add an iterator/accessor.
-            # Placeholder prints nothing — update as you implement.
-            # save_csv(path, trie.items())
+            save_csv(path, trie.items())  # Save current trie contents
             continue
 
         if cmd == 'insert' and len(parts) == 3:
@@ -70,13 +66,12 @@ def main():
             results = trie.complete(prefix, k)
             print(','.join(results))
             continue
-
         if cmd == 'stats':
             words, height, nodes = trie.stats()
             print(f"words={words} height={height} nodes={nodes}")
             continue
 
-        # Unknown or malformed commands do nothing (keeps grading simple)
+        # Unknown or malformed commands do nothing
 
 if __name__ == '__main__':
     main()
