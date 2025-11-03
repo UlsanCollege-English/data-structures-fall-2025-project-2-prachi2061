@@ -1,4 +1,3 @@
-# src/app.py
 """
 Interactive CLI entrypoint.
 Commands:
@@ -13,8 +12,8 @@ Commands:
 """
 
 import sys
-from src.trie import Trie
-from src.io_utils import load_csv, save_csv
+from trie import Trie           # ✅ Changed from 'src.trie' to 'trie'
+from io_utils import load_csv, save_csv  # ✅ Changed from 'src.io_utils' to 'io_utils'
 
 PROMPT = ""  # keep outputs machine-friendly (no prompt)
 
@@ -22,56 +21,54 @@ def main():
     trie = Trie()
 
     for line in sys.stdin:
-        line = line.strip()
-        if not line:
-            continue
-        parts = line.split()
-        cmd = parts[0].lower()
+        try:
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split()
+            cmd = parts[0].lower()
 
-        if cmd == 'quit':
-            break
+            if cmd == 'quit':
+                break
 
-        if cmd == 'load' and len(parts) == 2:
-            path = parts[1]
-            pairs = load_csv(path)
-            trie = Trie()  # Reset trie
-            for w, s in pairs:
-                trie.insert(w, s)
-            continue
+            elif cmd == 'load' and len(parts) == 2:
+                path = parts[1]
+                pairs = load_csv(path)
+                trie = Trie()  # Reset trie
+                for w, s in pairs:
+                    trie.insert(w, s)
 
-        if cmd == 'save' and len(parts) == 2:
-            path = parts[1]
-            save_csv(path, trie.items())  # Save current trie contents
-            continue
+            elif cmd == 'save' and len(parts) == 2:
+                path = parts[1]
+                save_csv(path, trie.items())
 
-        if cmd == 'insert' and len(parts) == 3:
-            w = parts[1].lower()
-            freq = float(parts[2])
-            trie.insert(w, freq)
-            continue
+            elif cmd == 'insert' and len(parts) == 3:
+                w = parts[1].lower()
+                freq = float(parts[2])
+                trie.insert(w, freq)
 
-        if cmd == 'remove' and len(parts) == 2:
-            w = parts[1].lower()
-            print('OK' if trie.remove(w) else 'MISS')
-            continue
+            elif cmd == 'remove' and len(parts) == 2:
+                w = parts[1].lower()
+                print('OK' if trie.remove(w) else 'MISS')
 
-        if cmd == 'contains' and len(parts) == 2:
-            w = parts[1].lower()
-            print('YES' if trie.contains(w) else 'NO')
-            continue
+            elif cmd == 'contains' and len(parts) == 2:
+                w = parts[1].lower()
+                print('YES' if trie.contains(w) else 'NO')
 
-        if cmd == 'complete' and len(parts) == 3:
-            prefix = parts[1].lower()
-            k = int(parts[2])
-            results = trie.complete(prefix, k)
-            print(','.join(results))
-            continue
-        if cmd == 'stats':
-            words, height, nodes = trie.stats()
-            print(f"words={words} height={height} nodes={nodes}")
-            continue
+            elif cmd == 'complete' and len(parts) == 3:
+                prefix = parts[1].lower()
+                k = int(parts[2])
+                results = trie.complete(prefix, k)
+                print(','.join(results))
 
-        # Unknown or malformed commands do nothing
+            elif cmd == 'stats':
+                words, height, nodes = trie.stats()
+                print(f"words={words} height={height} nodes={nodes}")
+
+            # Unknown or malformed commands are ignored
+
+        except Exception as e:
+            print(f"ERROR: {e}", file=sys.stderr)
 
 if __name__ == '__main__':
     main()

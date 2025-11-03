@@ -1,0 +1,17 @@
+from wordfreq import top_n_list, zipf_frequency
+import csv
+import os
+
+# Ensure data directory exists
+os.makedirs("data", exist_ok=True)
+
+# Generate top 50,000 English words
+words = top_n_list('en', 50000)
+
+# Write to data/words.csv
+with open('data/words.csv', 'w', newline='', encoding='utf-8') as f:
+    writer = csv.writer(f)
+    for w in words:
+        writer.writerow([w, zipf_frequency(w, 'en')])
+
+print("✅ data/words.csv generated with 50,000 words.")

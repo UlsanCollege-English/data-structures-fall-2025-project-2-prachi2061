@@ -11,15 +11,15 @@ class Trie:
 
     def insert(self, word, freq):
         node = self.root
-        for char in word:
-            node = node.children.setdefault(char, TrieNode())
+        for ch in word:
+            node = node.children.setdefault(ch, TrieNode())
         if not node.is_end:
             self.word_count += 1
         node.is_end = True
         node.freq = freq
 
     def remove(self, word):
-        def _remove(node, word, depth):
+        def _remove(node, depth):
             if depth == len(word):
                 if not node.is_end:
                     return False
@@ -27,62 +27,60 @@ class Trie:
                 node.freq = 0.0
                 self.word_count -= 1
                 return len(node.children) == 0
-            char = word[depth]
-            if char not in node.children:
+            ch = word[depth]
+            if ch not in node.children:
                 return False
-            should_delete = _remove(node.children[char], word, depth + 1)
+            should_delete = _remove(node.children[ch], depth + 1)
             if should_delete:
-                del node.children[char]
+                del node.children[ch]
                 return not node.is_end and len(node.children) == 0
             return False
 
-        return _remove(self.root, word, 0)
+        return _remove(self.root, 0)
 
     def contains(self, word):
         node = self.root
-        for char in word:
-            if char not in node.children:
+        for ch in word:
+            if ch not in node.children:
                 return False
-            node = node.children[char]
+            node = node.children[ch]
         return node.is_end
 
     def complete(self, prefix, k):
-        def dfs(node, path, results):
-            if node.is_end:
-                results.append((path, node.freq))
-            for char, child in node.children.items():
-                dfs(child, path + char, results)
-
         node = self.root
-        for char in prefix:
-            if char not in node.children:
+        for ch in prefix:
+            if ch not in node.children:
                 return []
-            node = node.children[char]
+            node = node.children[ch]
 
         results = []
-        dfs(node, prefix, results)
-        results.sort(key=lambda x: -x[1])
-        return [word for word, _ in results[:k]]
+        def dfs(n, path):
+            if n.is_end:
+                results.append((path, n.freq))
+            for c, child in n.children.items():
+                dfs(child, path + c)
+
+        dfs(node, prefix)
+        results.sort(key=lambda x: (-x[1], x[0]))
+        return [w for w, _ in results[:k]]
 
     def stats(self):
-        def height(node):
-            if not node.children:
+        def height(n):
+            if not n.children:
                 return 1
-            return 1 + max(height(child) for child in node.children.values())
+            return 1 + max(height(c) for c in n.children.values())
 
-        def count_nodes(node):
-            return 1 + sum(count_nodes(child) for child in node.children.values())
+        def count_nodes(n):
+            return 1 + sum(count_nodes(c) for c in n.children.values())
 
         return self.word_count, height(self.root), count_nodes(self.root)
 
     def items(self):
         result = []
-
-        def dfs(node, path):
-            if node.is_end:
-                result.append((path, node.freq))
-            for char, child in node.children.items():
-                dfs(child, path + char)
-
+        def dfs(n, path):
+            if n.is_end:
+                result.append((path, n.freq))
+            for c, child in n.children.items():
+                dfs(child, path + c)
         dfs(self.root, "")
         return result
